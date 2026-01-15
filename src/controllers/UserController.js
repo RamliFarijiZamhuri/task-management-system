@@ -12,7 +12,7 @@ class UserController {
         this.userRepository = userRepository;
         this.currentUser = null;
     }
-    
+
     /**
      * Register user baru
      * @param {Object} userData - Data user (username, email, fullName)
@@ -27,17 +27,17 @@ class UserController {
                     error: 'Username wajib diisi'
                 };
             }
-            
+
             if (!userData.email || userData.email.trim() === '') {
                 return {
                     success: false,
                     error: 'Email wajib diisi'
                 };
             }
-            
+
             // Buat user baru
             const user = this.userRepository.create(userData);
-            
+
             return {
                 success: true,
                 data: {
@@ -48,7 +48,7 @@ class UserController {
                 },
                 message: `User ${user.username} berhasil didaftarkan`
             };
-            
+
         } catch (error) {
             return {
                 success: false,
@@ -56,7 +56,7 @@ class UserController {
             };
         }
     }
-    
+
     /**
      * Login user (simulasi)
      * @param {string} username - Username
@@ -70,27 +70,27 @@ class UserController {
                     error: 'Username wajib diisi'
                 };
             }
-            
+
             const user = this.userRepository.findByUsername(username);
-            
+
             if (!user) {
                 return {
                     success: false,
                     error: 'User tidak ditemukan'
                 };
             }
-            
+
             if (!user.isActive) {
                 return {
                     success: false,
                     error: 'Akun tidak aktif'
                 };
             }
-            
+
             // Record login
             this.userRepository.recordLogin(user.id);
             this.currentUser = user;
-            
+
             return {
                 success: true,
                 data: {
@@ -103,7 +103,7 @@ class UserController {
                 },
                 message: `Selamat datang, ${user.fullName || user.username}!`
             };
-            
+
         } catch (error) {
             return {
                 success: false,
@@ -111,7 +111,7 @@ class UserController {
             };
         }
     }
-    
+
     /**
      * Logout user
      * @returns {Object} - Response success
@@ -119,13 +119,13 @@ class UserController {
     logout() {
         const username = this.currentUser ? this.currentUser.username : 'User';
         this.currentUser = null;
-        
+
         return {
             success: true,
             message: `${username} berhasil logout`
         };
     }
-    
+
     /**
      * Get current user
      * @returns {Object} - Response dengan current user atau error
@@ -137,7 +137,7 @@ class UserController {
                 error: 'Tidak ada user yang login'
             };
         }
-        
+
         return {
             success: true,
             data: {
@@ -151,7 +151,7 @@ class UserController {
             }
         };
     }
-    
+
     /**
      * Update user profile
      * @param {Object} updates - Data yang akan diupdate
@@ -165,19 +165,19 @@ class UserController {
                     error: 'User harus login terlebih dahulu'
                 };
             }
-            
+
             const updatedUser = this.userRepository.update(this.currentUser.id, updates);
-            
+
             if (!updatedUser) {
                 return {
                     success: false,
                     error: 'Gagal mengupdate profile'
                 };
             }
-            
+
             // Update current user reference
             this.currentUser = updatedUser;
-            
+
             return {
                 success: true,
                 data: {
@@ -189,7 +189,7 @@ class UserController {
                 },
                 message: 'Profile berhasil diupdate'
             };
-            
+
         } catch (error) {
             return {
                 success: false,
@@ -197,7 +197,7 @@ class UserController {
             };
         }
     }
-    
+
     /**
      * Update user preferences
      * @param {Object} preferences - Preferences baru
@@ -211,26 +211,26 @@ class UserController {
                     error: 'User harus login terlebih dahulu'
                 };
             }
-            
+
             const updatedUser = this.userRepository.update(this.currentUser.id, {
                 preferences: preferences
             });
-            
+
             if (!updatedUser) {
                 return {
                     success: false,
                     error: 'Gagal mengupdate preferences'
                 };
             }
-            
+
             this.currentUser = updatedUser;
-            
+
             return {
                 success: true,
                 data: updatedUser.preferences,
                 message: 'Preferences berhasil diupdate'
             };
-            
+
         } catch (error) {
             return {
                 success: false,
@@ -238,7 +238,7 @@ class UserController {
             };
         }
     }
-    
+
     /**
      * Get all users (untuk assign task)
      * @returns {Object} - Response dengan list user
@@ -251,22 +251,22 @@ class UserController {
                     error: 'User harus login terlebih dahulu'
                 };
             }
-            
+
             const users = this.userRepository.findActive();
-            
+
             // Return data minimal untuk privacy
             const userData = users.map(user => ({
                 id: user.id,
                 username: user.username,
                 fullName: user.fullName
             }));
-            
+
             return {
                 success: true,
                 data: userData,
                 count: userData.length
             };
-            
+
         } catch (error) {
             return {
                 success: false,
@@ -274,7 +274,7 @@ class UserController {
             };
         }
     }
-    
+
     /**
      * Search users
      * @param {string} query - Search query
@@ -288,16 +288,16 @@ class UserController {
                     error: 'User harus login terlebih dahulu'
                 };
             }
-            
+
             if (!query || query.trim() === '') {
                 return {
                     success: false,
                     error: 'Query pencarian tidak boleh kosong'
                 };
             }
-            
+
             const users = this.userRepository.search(query);
-            
+
             // Return data minimal untuk privacy
             const userData = users
                 .filter(user => user.isActive)
@@ -306,14 +306,14 @@ class UserController {
                     username: user.username,
                     fullName: user.fullName
                 }));
-            
+
             return {
                 success: true,
                 data: userData,
                 count: userData.length,
                 query: query
             };
-            
+
         } catch (error) {
             return {
                 success: false,
@@ -321,7 +321,7 @@ class UserController {
             };
         }
     }
-    
+
     /**
      * Check if user is logged in
      * @returns {boolean} - Login status
@@ -329,7 +329,7 @@ class UserController {
     isLoggedIn() {
         return this.currentUser !== null;
     }
-    
+
     /**
      * Get user by ID (untuk display assignee name)
      * @param {string} userId - User ID
@@ -338,14 +338,14 @@ class UserController {
     getUserById(userId) {
         try {
             const user = this.userRepository.findById(userId);
-            
+
             if (!user) {
                 return {
                     success: false,
                     error: 'User tidak ditemukan'
                 };
             }
-            
+
             return {
                 success: true,
                 data: {
@@ -354,7 +354,127 @@ class UserController {
                     fullName: user.fullName
                 }
             };
-            
+
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    // Tambahkan method ini di class UserController
+
+    /**
+     * Get user profile with statistics
+     * @returns {Object} - Response dengan user profile dan stats
+     */
+    getUserProfile() {
+        try {
+            if (!this.currentUser) {
+                return {
+                    success: false,
+                    error: 'User harus login terlebih dahulu'
+                };
+            }
+
+            // Get user's task statistics
+            const userTasks = this.taskRepository ? this.taskRepository.findByOwner(this.currentUser.id) : [];
+
+            const stats = {
+                totalTasks: userTasks.length,
+                completedTasks: userTasks.filter(task => task.isCompleted).length,
+                pendingTasks: userTasks.filter(task => !task.isCompleted).length,
+                overdueTasks: userTasks.filter(task => task.isOverdue).length,
+                tasksByCategory: {}
+            };
+
+            // Calculate completion rate
+            stats.completionRate = stats.totalTasks > 0 ?
+                Math.round((stats.completedTasks / stats.totalTasks) * 100) : 0;
+
+            // Group tasks by category
+            userTasks.forEach(task => {
+                const category = task.category;
+                if (!stats.tasksByCategory[category]) {
+                    stats.tasksByCategory[category] = 0;
+                }
+                stats.tasksByCategory[category]++;
+            });
+
+            return {
+                success: true,
+                data: {
+                    user: {
+                        id: this.currentUser.id,
+                        username: this.currentUser.username,
+                        email: this.currentUser.email,
+                        fullName: this.currentUser.fullName,
+                        role: this.currentUser.role,
+                        createdAt: this.currentUser.createdAt,
+                        lastLoginAt: this.currentUser.lastLoginAt,
+                        preferences: this.currentUser.preferences
+                    },
+                    statistics: stats
+                }
+            };
+
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    /**
+     * Update user preferences
+     * @param {Object} newPreferences - New preferences
+     * @returns {Object} - Response success atau error
+     */
+    updateUserPreferences(newPreferences) {
+        try {
+            if (!this.currentUser) {
+                return {
+                    success: false,
+                    error: 'User harus login terlebih dahulu'
+                };
+            }
+
+            // Validate preferences
+            const validPreferences = ['theme', 'defaultCategory', 'emailNotifications', 'language'];
+            const invalidKeys = Object.keys(newPreferences).filter(key => !validPreferences.includes(key));
+
+            if (invalidKeys.length > 0) {
+                return {
+                    success: false,
+                    error: `Invalid preference keys: ${invalidKeys.join(', ')}`
+                };
+            }
+
+            // Update preferences
+            const updatedUser = this.userRepository.update(this.currentUser.id, {
+                preferences: {
+                    ...this.currentUser.preferences,
+                    ...newPreferences
+                }
+            });
+
+            if (!updatedUser) {
+                return {
+                    success: false,
+                    error: 'Gagal mengupdate preferences'
+                };
+            }
+
+            this.currentUser = updatedUser;
+
+            return {
+                success: true,
+                data: updatedUser.preferences,
+                message: 'Preferences berhasil diupdate'
+            };
+
         } catch (error) {
             return {
                 success: false,
